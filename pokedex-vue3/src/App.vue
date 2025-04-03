@@ -5,10 +5,13 @@ import HelloWorld from './components/HelloWorld.vue'
 <template>
   <v-app>
     <v-container>
-      <v-btn color="primary">Meu primeiro teste Vuetify!</v-btn>
+      <v-btn to="/" color="primary">Home</v-btn>
+      <v-btn to="/pokemon/1" color="secondary">Detalhes do Pokémon 1</v-btn>
+      <router-view />
     </v-container>
   </v-app>
 </template>
+>
 
 <style scoped>
 .logo {
