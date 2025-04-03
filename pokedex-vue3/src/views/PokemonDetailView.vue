@@ -2,7 +2,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { usePokemonStore } from '../store/pokemonStore'
+import { usePokemonStore } from '@/store/pokemonStore'
 
 const route = useRoute()
 const store = usePokemonStore()

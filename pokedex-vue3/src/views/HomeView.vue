@@ -1,31 +1,63 @@
-<!-- src/views/HomeView.vue -->
-<script setup>
-import { onMounted } from 'vue'
-import { usePokemonStore } from '../store/pokemonStore'
+<template>
+  <div class="pokedex-container">
+    <h1>Pokédex</h1>
+    <input v-model="searchQuery" placeholder="Buscar Pokémon..." />
+    <div v-if="loading">Carregando...</div>
+    <div v-else>
+      <div v-for="pokemon in filteredPokemon" :key="pokemon.id" class="pokemon-card">
+        <img :src="pokemon.image" :alt="pokemon.name" />
+        <h2>{{ pokemon.name }}</h2>
+        <p>Tipo: {{ pokemon.type }}</p>
+      </div>
+    </div>
+  </div>
+</template>
 
-const store = usePokemonStore()
+<script>
+import axios from 'axios';
 
-onMounted(() => {
-  store.fetchPokemons(20, 0) // Buscar os primeiros 20 Pokémon
-})
+export default {
+  data() {
+    return {
+      searchQuery: '',
+      pokemonList: [],
+      loading: true
+    };
+  },
+  computed: {
+    filteredPokemon() {
+      return this.pokemonList.filter(pokemon => 
+        pokemon.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        pokemon.id.toString() === this.searchQuery
+      );
+    }
+  },
+  async created() {
+    try {
+      const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=50');
+      this.pokemonList = response.data.results.map((p, index) => ({
+        id: index + 1,
+        name: p.name,
+        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`,
+        type: 'Desconhecido' // Removendo tipos detalhados
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar os Pokémon', error);
+    } finally {
+      this.loading = false;
+    }
+  }
+};
 </script>
 
-<template>
-  <v-container>
-    <h1 class="text-h4 text-center">Pokédex</h1>
-
-    <v-row>
-      <v-col v-for="pokemon in store.pokemons" :key="pokemon.id" cols="12" sm="6" md="4" lg="3">
-        <v-card>
-          <v-img :src="pokemon.sprites.front_default" height="150"></v-img>
-          <v-card-title>{{ pokemon.name }}</v-card-title>
-          <v-card-actions>
-            <v-btn :to="`/pokemon/${pokemon.name}`" color="primary">Detalhes</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <v-progress-linear v-if="store.isLoading" indeterminate></v-progress-linear>
-  </v-container>
-</template>
+<style scoped>
+.pokedex-container {
+  text-align: center;
+}
+.pokemon-card {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+</style>
